@@ -1,0 +1,96 @@
+version: "3"
+services:
+  operator:
+    # command: sudo -u app sh -c 'cd dist && node --experimental-json-modules index.js'
+    build: .
+    init: true
+    user: "${UID}:${GID}"
+    volumes:
+      - $PWD:/home/app/
+    dns:
+      - 1.1.1.1
+      - 1.0.0.1
+      - 8.8.8.8
+      - 8.8.4.4
+    env_file:
+      - .env
+    links:
+      - redis:redis.local
+      - postgres:postgres.local
+      - ocr:ocr.local
+      - sandbox:sandbox.local
+      - memcached:memcached.local
+    healthcheck:
+      test: ss | grep '162.159.13' -q
+      interval: 10s
+      timeout: 1s
+      retries: 3
+      start_period: 60s
+    depends_on:
+      # ocr:
+      #   condition: service_healthy
+      postgres:
+        condition: service_healthy
+  postgres:
+    image: postgres
+    user: postgres
+    restart: always
+    # command: postgres -c listen_addresses=localhost
+    environment:
+      - POSTGRES_PASSWORD=operator_internal
+      - PGUSER=postgres
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 4G
+  memcached:
+    image: memcached:1
+    restart: always
+    command: memcached -m 384
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+    # healthcheck:
+    #   test: [ "CMD-SHELL", "nc", "-zw3", "localhost", "11211" ]
+    #   interval: 5s
+    #   timeout: 3s
+    #   start_period: 3s
+  ocr:
+    build: ./sandbox/ocr/
+    init: true
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 2G
+    healthcheck:
+      test: curl -o /dev/null 127.0.0.1:3001
+      interval: 3s
+      timeout: 200ms
+      start_period: 15s
+      retries: 2
+  # sandbox:
+  #   image: execution-sandbox
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: '1'
+  #         memory: 2G
+  #   healthcheck:
+  #     test: [ "CMD", "curl", "-o", "/dev/null", "127.0.0.1:3001" ]
+  #     interval: 3s
+  #     timeout: 200ms
+  #     retries: 2
+
+
+  # volumes:
+  #   operator-mongodb:
+  #     external: false

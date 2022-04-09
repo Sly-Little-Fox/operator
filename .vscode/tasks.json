@@ -1,0 +1,15 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "type": "shell",
+      "command": "mkdir -p dist/data/links && cp -rv ./src/data/links/*.txt dist/data/links; ./node_modules/.bin/tsc --watch",
+      "label": "TS - watch",
+      "isBackground": true,
+      "problemMatcher": "$tsc-watch",
+      "runOptions": {
+        "runOn": "folderOpen"
+      }
+    }
+  ]
+}

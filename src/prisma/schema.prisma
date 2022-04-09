@@ -1,0 +1,24 @@
+datasource db {
+  url      = "postgresql://postgres:operator_internal@postgres"
+  provider = "postgresql"
+}
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["mongoDb"]
+}
+
+model Server {
+  id                      String    @id
+  linksFilteringProviders String[]
+  config                  Json?
+  warnings                Warning[]
+}
+
+model Warning {
+  id       Int    @id @default(autoincrement())
+  weight   Float  @default(1)
+  reason   String @default("N/A")
+  serverId String
+  Server   Server @relation(fields: [serverId], references: [id])
+}

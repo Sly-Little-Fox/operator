@@ -1,0 +1,48 @@
+env:
+  es2021: true
+  node: true
+extends:
+  - airbnb-base
+  - eslint:recommended
+  - plugin:@typescript-eslint/recommended
+  - airbnb-typescript/base
+  - prettier
+parser: "@typescript-eslint/parser"
+parserOptions:
+  ecmaVersion: 12
+  sourceType: module
+  project: "tsconfig.json"
+plugins:
+  - "@typescript-eslint"
+rules:
+  no-console: "off"
+  no-restricted-syntax:
+    - error
+    - selector: ForInStatement
+      message:
+        for..in loops iterate over the entire prototype chain, which is virtually
+        never what you want. Use Object.{keys,values,entries}, and iterate over the resulting
+        array.
+    - selector: LabeledStatement
+      message:
+        Labels are a form of GOTO; using them makes code confusing and hard to
+        maintain and understand.
+    - selector: WithStatement
+      message:
+        "'with' is disallowed in strict mode because it makes code impossible to
+        predict and optimize."
+  import/prefer-default-export: "off"
+  class-methods-use-this: "off"
+  import/extensions:
+    - warn
+    - never
+    - json: always
+  "@typescript-eslint/no-unused-vars":
+    - error
+    - argsIgnorePattern: "^_"
+  "@typescript-eslint/no-non-null-assertion": "off"
+  "@typescript-eslint/no-explicit-any": "off"
+  no-irregular-whitespace: ["warn", { skipTemplates: true }]
+  no-underscore-dangle:
+    - error
+    - allow: ["__dirname", "__filename"]
