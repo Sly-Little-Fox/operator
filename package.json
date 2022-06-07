@@ -7,7 +7,9 @@
   "license": "GPL-3.0",
   "type": "module",
   "resolutions": {
-    "lru-cache": "^7.10.1"
+    "lru-cache": "^7.10.1",
+    "node-fetch": "^2.6.7",
+    "@types/node-fetch": "^2.6.7"
   },
   "engines": {
     "node": ">=16.0.0"
