@@ -4,21 +4,46 @@ datasource db {
 }
 
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["mongoDb"]
+  provider = "prisma-client-js"
 }
 
 model Server {
-  id                      String    @id
-  linksFilteringProviders String[]
-  config                  Json?
-  warnings                Warning[]
+  id            String    @id
+  config        Json?
+  keyValueStore Json?
+  warnings      Warning[]
+  handlers      Handler[]
+}
+
+model TapkiUser {
+  id             String  @id
+  hp             Int     @default(1000)
+  tapki          Int     @default(10)
+  inHospitalFrom Int?
+}
+
+model Member {
+  id     String @id
+  config Json?
 }
 
 model Warning {
-  id       Int    @id @default(autoincrement())
-  weight   Float  @default(1)
-  reason   String @default("N/A")
-  serverId String
-  Server   Server @relation(fields: [serverId], references: [id])
+  id          Int     @id @default(autoincrement())
+  weight      Int     @default(1)
+  reason      String? @default("N/A")
+  userId      String
+  guildId     String
+  moderatorId String?
+  Server      Server? @relation(fields: [serverId], references: [id])
+  serverId    String?
+}
+
+model Handler {
+  id         Int     @id @default(autoincrement())
+  action     String
+  event      String
+  guildId    String
+  whoAddedId String
+  Server     Server? @relation(fields: [serverId], references: [id])
+  serverId   String?
 }

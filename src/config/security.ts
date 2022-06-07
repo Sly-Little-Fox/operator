@@ -1,5 +1,7 @@
 import pm from "picomatch";
 
+export const LOCAL_SETTINGS = ["core.enableAI", "core.footers", "core.uwu"];
+
 export const WHITELISTED_HOSTS = [
   "api.phisherman.gg",
   "cdn.jsdelivr.net",

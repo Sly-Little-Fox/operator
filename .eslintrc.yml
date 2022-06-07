@@ -44,5 +44,9 @@ rules:
   "@typescript-eslint/no-explicit-any": "off"
   no-irregular-whitespace: ["warn", { skipTemplates: true }]
   no-underscore-dangle:
-    - error
+    - off
     - allow: ["__dirname", "__filename"]
+  # "@typescript-eslint/no-base-to-string": "error"
+  no-param-reassign: "off"
+  prefer-template: "off"
+  no-empty: ["error", { "allowEmptyCatch": true }]

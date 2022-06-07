@@ -1,7 +1,8 @@
-FROM node:16-bullseye-slim
+FROM debian:bookworm
 
 RUN apt update && \
   apt upgrade -y && \
+  apt install libvips42 curl nodejs yarnpkg git   -y && \
   apt clean
 
 RUN useradd -m app
@@ -12,13 +13,22 @@ RUN chmod -R 777 /home/app/
 
 RUN chown -R app:app /home/app/
 
-WORKDIR /home/app/
-
 USER app
 
-RUN rm -rf node_modules
+# RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | sh
 
-RUN NODE_ENV=production yarn install && yarn cache clean
+# ENV NVM_DIR=/home/app/.nvm
 
-CMD HTTPS_PROXY= ./node_modules/.bin/prisma db push --schema ./src/prisma/schema.prisma && \
-  HTTPS_PROXY="$HTTPS_PROXY" node --experimental-json-modules --experimental-import-meta-resolve dist/index.js
+WORKDIR /home/app/data/
+
+ENV HOME=/home/app/ \
+  NODE_ENV=development \
+  USER=app
+
+RUN rm -rf node_modules/
+
+RUN yarnpkg install && yarnpkg cache clean --mirror
+
+CMD \
+  HTTPS_PROXY= ./node_modules/.bin/prisma db push --schema ./src/prisma/schema.prisma && \
+  HTTPS_PROXY="$HTTPS_PROXY" node --inspect=0.0.0.0:9229 --experimental-json-modules --experimental-import-meta-resolve dist/index.js

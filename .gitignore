@@ -1,4 +1,3 @@
-
 # Created by https://www.toptal.com/developers/gitignore/api/node,yarn,linux
 # Edit at https://www.toptal.com/developers/gitignore?templates=node,yarn,linux
 
@@ -175,3 +174,7 @@ dist
 .pnp.*
 
 # End of https://www.toptal.com/developers/gitignore/api/node,yarn,linux
+
+postgres
+
+coredocs/.retype

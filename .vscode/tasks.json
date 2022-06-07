@@ -3,7 +3,7 @@
   "tasks": [
     {
       "type": "shell",
-      "command": "mkdir -p dist/data/links && cp -rv ./src/data/links/*.txt dist/data/links; ./node_modules/.bin/tsc --watch",
+      "command": ". ~/.bashrc && rsync --exclude *.ts -a ./src/data/ ./dist/data/; ./node_modules/.bin/tsc --watch",
       "label": "TS - watch",
       "isBackground": true,
       "problemMatcher": "$tsc-watch",

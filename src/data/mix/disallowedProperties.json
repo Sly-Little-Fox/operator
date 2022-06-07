@@ -1,0 +1,15 @@
+[
+  "client",
+  "token",
+  "destroy",
+  "on",
+  "once",
+  "addListener",
+  "addEventListener",
+  "prependEventListener",
+  "guilds",
+  "application",
+  "voice",
+  "ws",
+  "login"
+]

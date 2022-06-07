@@ -1,0 +1,13 @@
+input: .
+output: .retype
+url: # Add your website address here
+branding:
+  title: Operator
+  label: v0.0.1-alpha
+links:
+  - text: Getting started with handlers
+    link: /Handlers/what-are-handlers
+  - text: Premium giveaway
+    link: https://www.youtube.com/watch?v=dQw4w9WgXcQ
+footer:
+  copyright: "Created by Sly-Little-Fox and contributors. CC-BY-SA license."
