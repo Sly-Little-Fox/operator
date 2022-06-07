@@ -2025,15 +2025,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"google-safe-browsing@npm:^1.0.3":
-  version: 1.0.3
-  resolution: "google-safe-browsing@npm:1.0.3"
-  dependencies:
-    node-fetch: 2.6.1
-  checksum: 56245c87fe2fe0fbd41f264c2a5a144177a3cefadf8b64451a72285f44124be182642d73960d28b4cf5bf8f9adea0483e92d08c99e5aebabeff6d5b41a6e8adf
-  languageName: node
-  linkType: hard
-
 "graceful-fs@npm:^4.2.6":
   version: 4.2.10
   resolution: "graceful-fs@npm:4.2.10"
@@ -2828,13 +2819,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-fetch@npm:2.6.1":
-  version: 2.6.1
-  resolution: "node-fetch@npm:2.6.1"
-  checksum: 91075bedd57879117e310fbcc36983ad5d699e522edb1ebcdc4ee5294c982843982652925c3532729fdc86b2d64a8a827797a745f332040d91823c8752ee4d7c
-  languageName: node
-  linkType: hard
-
 "node-fetch@npm:^2.6.1":
   version: 2.6.7
   resolution: "node-fetch@npm:2.6.7"
@@ -3030,7 +3014,6 @@ __metadata:
     eslint-config-prettier: ^8.5.0
     eslint-plugin-import: ^2.26.0
     fuse.js: ^6.6.2
-    google-safe-browsing: ^1.0.3
     lodash: ^4.17.21
     mem: ^9.0.2
     memcached: ^2.2.2

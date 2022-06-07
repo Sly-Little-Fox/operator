@@ -33,7 +33,6 @@
     "discord.js": "^13.7.0",
     "dotenv": "^16.0.1",
     "fuse.js": "^6.6.2",
-    "google-safe-browsing": "^1.0.3",
     "lodash": "^4.17.21",
     "mem": "^9.0.2",
     "memcached": "^2.2.2",

@@ -1,4 +1,3 @@
-import { GoogleSafeBrowsingClient } from "google-safe-browsing";
 import { readFile } from "node:fs/promises";
 import mem from "mem";
 import Fuse from "fuse.js";
@@ -24,11 +23,6 @@ const fuzzyIndex = new Fuse(
     threshold: 0.9,
   }
 );
-
-const safeBrowsingChecker = process.env.SAFE_BROWSING_KEY
-  ? new GoogleSafeBrowsingClient(process.env.SAFE_BROWSING_KEY)
-  : null;
-
 /*
  * All these functions return a boolean meaning "is url allowed"
  * They can optionally accept an argument "isNsfwChannel"
@@ -61,13 +55,32 @@ export async function quad9(url: URL): Promise<boolean> {
 }
 
 export async function safeBrowsing(url: URL): Promise<boolean> {
-  if (safeBrowsingChecker === null) {
+  if (process.env.SAFE_BROWSING_KEY === null) {
     container.logger.warn(
       "You didn't provide a Safe Browsing API key. Provider will be disabled."
     );
     return true;
   }
-  const result = await safeBrowsingChecker.isUrlSafe(url.href);
+  const { body } = await p<{ matches: unknown[] }>({
+    url: `https://safebrowsing.googleapis.com/v4/threatMatches:find?key=${encodeURIComponent(
+      process.env.SAFE_BROWSING_KEY!
+    )}`,
+    parse: "json",
+    method: "POST",
+    data: {
+      client: {
+        clientId: "Operator",
+        clientVersion: "0.0.1-alpha",
+      },
+      threatInfo: {
+        threatTypes: ["MALWARE", "SOCIAL_ENGINEERING", "UNWANTED_SOFTWARE"],
+        platformTypes: ["ANY_PLATFORM"],
+        threatEntryTypes: ["URL"],
+        threatEntries: [{ url: `${url.protocol}//${url.host}${url.pathname}` }],
+      },
+    },
+  });
+  const result = body.matches?.length === 0;
   return result;
 }
 

@@ -175,6 +175,9 @@ dist
 
 # End of https://www.toptal.com/developers/gitignore/api/node,yarn,linux
 
-postgres
+# Start tapki
+core
+docs/.retype
 
-coredocs/.retype
+# Ghostwriter backups
+*.backup
