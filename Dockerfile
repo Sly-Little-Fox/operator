@@ -29,6 +29,8 @@ RUN rm -rf node_modules/
 
 RUN yarnpkg install && yarnpkg install prisma typescript -D && yarnpkg cache clean --mirror
 
+RUN ./node_modules/.bin/tsc
+
 CMD \
   HTTPS_PROXY= ./node_modules/.bin/prisma db push --schema ./src/prisma/schema.prisma && \
   HTTPS_PROXY="$HTTPS_PROXY" node --inspect=0.0.0.0:9229 --experimental-json-modules --experimental-import-meta-resolve dist/index.js
