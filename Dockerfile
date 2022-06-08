@@ -27,7 +27,7 @@ ENV HOME=/home/app/ \
 
 RUN rm -rf node_modules/
 
-RUN yarnpkg install prisma && yarnpkg cache clean --mirror
+RUN yarnpkg install && yarnpkg install prisma typescript -D && yarnpkg cache clean --mirror
 
 CMD \
   HTTPS_PROXY= ./node_modules/.bin/prisma db push --schema ./src/prisma/schema.prisma && \
