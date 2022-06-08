@@ -25,7 +25,7 @@ export class OperatorClient extends SapphireClient {
       caseInsensitiveCommands: true,
       caseInsensitivePrefixes: true,
       defaultPrefix: PREFIX,
-      loadMessageCommandListeners: true,
+      loadMessageCommandListeners: false,
       disableMentionPrefix: true,
       intents: ["GUILDS", "GUILD_MESSAGES", "DIRECT_MESSAGES"],
       logger: { level: LogLevel.Debug },
