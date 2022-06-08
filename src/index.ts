@@ -20,7 +20,7 @@ import _ from "lodash";
 import owoify from "owoify-js";
 import tryToCatch from "try-to-catch";
 import phin from "phin";
-import { SocksProxyAgent } from "socks-proxy-agent"; // TODO: remove in production
+//import { SocksProxyAgent } from "socks-proxy-agent"; // TODO: remove in production
 import Fuse from "fuse.js";
 import cron from "node-cron";
 import * as intents from "./chat/intents.js";
@@ -377,17 +377,7 @@ client.on("messageCreate", async (message) => {
         Authorization: `Bearer ${process.env.WIT_API_TOKEN}`,
         "Content-Type": "application/json",
       },
-      parse: "json",
-      core: {
-        agent: process.env.PROXY_HOST
-          ? new SocksProxyAgent({
-              hostname: process.env.PROXY_HOST,
-              port: Number(process.env.PROXY_PORT),
-              username: process.env.PROXY_USERNAME,
-              password: process.env.PROXY_PASSWORD,
-            })
-          : undefined,
-      },
+      parse: "json"
     });
     const recognizedIntent =
       intents[

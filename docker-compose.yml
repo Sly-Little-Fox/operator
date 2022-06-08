@@ -7,8 +7,8 @@ services:
     tty: true
     user: "${UID}:${GID}"
     volumes:
-      - $PWD:/home/app/data/ # TODO: remove this once ready for production
-      - ./logs/:/home/app/app/logs/ # TODO: replace with a Docker volume?
+      #- $PWD:/home/app/data/ # TODO: remove this once ready for production
+      - operator-logs:/home/app/app/logs/ # TODO: replace with a Docker volume?
     dns:
       - 1.1.1.1
       - 1.0.0.1
@@ -33,6 +33,11 @@ services:
       #   condition: service_healthy
       postgres:
         condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
   postgres:
     image: postgres
     # command: postgres -c listen_addresses=localhost
@@ -50,7 +55,7 @@ services:
       resources:
         limits:
           cpus: '1'
-          memory: 4G
+          memory: 1G
   memcached:
     image: memcached:1
     command: memcached -m 384
@@ -71,12 +76,12 @@ services:
       resources:
         limits:
           cpus: '1'
-          memory: 2G
+          memory: 384M
     healthcheck:
       test: curl -o /dev/null 127.0.0.1:3001
       interval: 3s
       timeout: 200ms
-      start_period: 15s
+      start_period: 5s
       retries: 2
   # lua:
   #   build: ./services/lua/
@@ -102,4 +107,6 @@ services:
 
 volumes:
   operator-postgres:
+    external: false
+  operator-logs:
     external: false
