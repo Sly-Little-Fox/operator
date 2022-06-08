@@ -22,12 +22,12 @@ USER app
 WORKDIR /home/app/data/
 
 ENV HOME=/home/app/ \
-  NODE_ENV=development \
+  NODE_ENV=production \
   USER=app
 
 RUN rm -rf node_modules/
 
-RUN yarnpkg install && yarnpkg cache clean --mirror
+RUN yarnpkg install prisma && yarnpkg cache clean --mirror
 
 CMD \
   HTTPS_PROXY= ./node_modules/.bin/prisma db push --schema ./src/prisma/schema.prisma && \
