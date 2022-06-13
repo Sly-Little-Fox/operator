@@ -113,6 +113,17 @@ export interface GenericEventContext {
   guild: Guild;
 }
 
+export interface MemberEventContext {
+  member: GuildMember;
+  guild: Guild;
+}
+
+export interface MemberEventContextWithReason {
+  member: GuildMember;
+  guild: Guild;
+  reason?: string;
+}
+
 export interface GenericEventContextWithReason {
   member?: GuildMember;
   guild: Guild;
@@ -128,6 +139,8 @@ export interface WarningEventContext {
 }
 
 export type Events = {
+  memberLeft: (ctx: MemberEventContext) => void;
+  memberJoined: (ctx: MemberEventContext) => void;
   messageCreate: (ctx: MessageEventContext) => void;
   messageDelete: (ctx: MessageEventContext) => void;
   messageUpdate: (
@@ -137,21 +150,21 @@ export type Events = {
   ) => void;
   warningCreated: (ctx: WarningEventContext) => void;
   warningRemoved: (ctx: WarningEventContext) => void;
-  warningsReset: (ctx: {
-    member: GuildMember;
-    guild: Guild;
-    reason?: string;
-    warningIds: number[];
-    moderator?: GuildMember;
-  }) => void;
-  userKicked: (ctx: GenericEventContextWithReason) => void;
+  warningsReset: (
+    ctx: MemberEventContext & {
+      reason?: string;
+      warningIds: number[];
+      moderator?: GuildMember;
+    }
+  ) => void;
+  userKicked: (ctx: MemberEventContextWithReason) => void;
   userBanned: (
-    ctx: GenericEventContextWithReason & {
+    ctx: MemberEventContextWithReason & {
       deleteMessagesDays?: number;
     }
   ) => void;
   userTimedOut: (
-    ctx: GenericEventContextWithReason & {
+    ctx: MemberEventContextWithReason & {
       time: number | null;
     }
   ) => void;
@@ -170,17 +183,19 @@ export type Events = {
       matchesWithConfidence: { match: string; confidence: string }[];
     }
   ) => void;
-  punishmentFailed: (ctx: {
-    member: GuildMember;
-    guild: Guild;
-    message?: string;
-    source: "antiFlood" | "linkProtection" | "handler" | "wordFilter";
-  }) => void;
+  punishmentFailed: (
+    ctx: MemberEventContext & {
+      message?: string;
+      source: "antiFlood" | "linkProtection" | "handler" | "wordFilter";
+    }
+  ) => void;
 };
 
 export const allEvents = [
+  "memberLeft",
   "userKicked",
   "userBanned",
+  "memberJoined",
   "userTimedOut",
   "messageCreate",
   "messageUpdate",

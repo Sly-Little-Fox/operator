@@ -19,10 +19,7 @@ export function externalError(message: string, title = ""): MessageEmbed {
   return embed;
 }
 
-export function internalError(
-  message: string,
-  title = ""
-): MessageEmbed {
+export function internalError(message: string, title = ""): MessageEmbed {
   const embed = new MessageEmbed()
     .setColor(ERROR)
     .setTitle(title)

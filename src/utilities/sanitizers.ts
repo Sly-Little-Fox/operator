@@ -1,10 +1,12 @@
-import { container } from "@sapphire/framework";
+import { container as cntr } from "@sapphire/framework";
 import type {
   BanOptions,
   DateResolvable,
   Guild,
   GuildMember,
+  TextChannel,
   User,
+  VoiceChannel,
 } from "discord.js";
 import _ from "lodash";
 import pThrottle from "p-throttle";
@@ -67,6 +69,7 @@ export function sanitizeUser(user: User) {
     defaultAvatarURL: user.defaultAvatarURL,
     createdTimestamp: user.createdTimestamp,
     displayAvatarURL: user.displayAvatarURL.bind(user),
+    toString: () => `<@${user.id}>`,
   };
 }
 
@@ -82,7 +85,7 @@ export function sanitizeGuildMember(member: GuildMember) {
     kick(reason: string | undefined) {
       if (!member.kickable)
         throw new Error("This member cannot be kicked by the bot");
-      container.events.emit("userKicked", {
+      cntr.events.emit("userKicked", {
         guild: member.guild,
         member,
         reason,
@@ -92,7 +95,7 @@ export function sanitizeGuildMember(member: GuildMember) {
     ban(options: BanOptions) {
       if (!member?.bannable)
         throw new Error("This member cannot be banned by the bot");
-      container.events.emit("userBanned", {
+      cntr.events.emit("userBanned", {
         member,
         guild: member.guild,
         deleteMessagesDays: options.days,
@@ -114,7 +117,7 @@ export function sanitizeGuildMember(member: GuildMember) {
     timeout(time: number, reason: string | undefined) {
       if (!member.moderatable)
         throw new Error("This member cannot be timed out by the bot");
-      container.events.emit("userTimedOut", {
+      cntr.events.emit("userTimedOut", {
         guild: member.guild,
         time: time * 1000,
         reason,
@@ -131,7 +134,7 @@ export function sanitizeGuildMember(member: GuildMember) {
     ) {
       if (!member.moderatable)
         throw new Error("This member cannot be timed out by the bot");
-      container.events.emit("userTimedOut", {
+      cntr.events.emit("userTimedOut", {
         guild: member.guild,
         time: timeout ? resolveDate(timeout) - Date.now() : null,
         reason,
@@ -161,9 +164,41 @@ export function sanitizeGuildMember(member: GuildMember) {
         userId: member.id,
       });
     },
+    toString: () => `<@${member.id}>`,
   };
 
   return sanitized;
+}
+
+export function sanitizeTextChannel(channel: TextChannel) {
+  return {
+    id: channel.id,
+    nsfw: channel.nsfw,
+    name: channel.name,
+    sendTyping: channel.sendTyping.bind(channel),
+    position: channel.position,
+    rawPosition: channel.rawPosition,
+    send: noReturn(channel.send, channel),
+    bulkDelete: noReturn(channel.bulkDelete, channel),
+    clone: async (opts: any) => sanitizeTextChannel(await channel.clone(opts)),
+    toString: () => `<#${channel.id}>`,
+  };
+}
+
+export function sanitizeVoiceChannel(channel: VoiceChannel) {
+  return {
+    id: channel.id,
+    name: channel.name,
+    sendTyping: channel.sendTyping.bind(channel),
+    position: channel.position,
+    rawPosition: channel.rawPosition,
+    send: noReturn(channel.send, channel),
+    bitware: channel.bitrate,
+    setBitware: noReturn(channel.setBitrate, channel),
+    bulkDelete: noReturn(channel.bulkDelete, channel),
+    clone: async (opts: any) => sanitizeVoiceChannel(await channel.clone(opts)),
+    toString: () => `<#${channel.id}>`,
+  };
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
@@ -179,14 +214,9 @@ export function sanitizeMessage(message: GuildMessage) {
     reply: async (options: any) =>
       sanitizeMessage((await message.reply(options)) as GuildMessage),
     channel: {
-      sendTyping: () => {},
-      id: message.channel.id,
+      ...sanitizeTextChannel(message.channel),
       send: async (options: any) =>
         sanitizeMessage((await message.channel.send(options)) as GuildMessage),
-      nsfw: message.channel.nsfw,
-      position: message.channel.position,
-      rawPosition: message.channel.rawPosition,
-      name: message.channel ? message.channel.name : null,
     },
     attachments: message.attachments,
     member: sanitizeGuildMember(message.member),

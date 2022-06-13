@@ -2,12 +2,12 @@ FROM debian:bookworm
 
 RUN apt update && \
   apt upgrade -y && \
-  apt install libvips42 curl nodejs yarnpkg git   -y && \
+  apt install rsync libvips42 curl npm nodejs yarnpkg git   -y && \
   apt clean
 
 RUN useradd -m app
 
-ADD --chown=app:app . /home/app
+ADD --chown=app:app . /home/app/data
 
 RUN chmod -R 777 /home/app/
 
@@ -27,10 +27,12 @@ ENV HOME=/home/app/ \
 
 RUN rm -rf node_modules/
 
-RUN yarnpkg install && yarnpkg install prisma typescript -D && yarnpkg cache clean --mirror
+RUN NODE_ENV=development yarnpkg install && yarnpkg cache clean --mirror
 
 RUN ./node_modules/.bin/tsc
 
+RUN rsync --exclude *.ts -a ./src/data/ ./dist/data/
+
 CMD \
   HTTPS_PROXY= ./node_modules/.bin/prisma db push --schema ./src/prisma/schema.prisma && \
-  HTTPS_PROXY="$HTTPS_PROXY" node --inspect=0.0.0.0:9229 --experimental-json-modules --experimental-import-meta-resolve dist/index.js
+  HTTPS_PROXY="$HTTPS_PROXY" node --experimental-json-modules --experimental-import-meta-resolve dist/index.js

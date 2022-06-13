@@ -1,6 +1,6 @@
 import _ from "lodash";
 import { VM } from "vm2";
-import { container } from "@sapphire/framework";
+import { container as cntr } from "@sapphire/framework";
 import { Guild, GuildMember, Message, User } from "discord.js";
 import rfs from "rotating-file-stream";
 import type { AnyContext, GuildMessage, Events } from "../types.js";
@@ -9,7 +9,9 @@ import {
   sanitizeGuild,
   sanitizeGuildMember,
   sanitizeMessage,
+  sanitizeTextChannel,
   sanitizeUser,
+  sanitizeVoiceChannel,
 } from "./sanitizers.js";
 
 function logMessage(
@@ -18,7 +20,7 @@ function logMessage(
   type: "log" | "fatal" | "error" | "warn" | "debug" | "info" = "log"
 ) {
   if (typeof message !== "string") return;
-  const existingStream = container.rotatingStreamMap.get(guildId);
+  const existingStream = cntr.rotatingStreamMap.get(guildId);
   const stream =
     existingStream ||
     rfs.createStream(`./logs/${guildId}.txt`, {
@@ -26,7 +28,7 @@ function logMessage(
       maxSize: "4096K",
       compress: "gzip",
     });
-  if (!existingStream) container.rotatingStreamMap.set(guildId, stream);
+  if (!existingStream) cntr.rotatingStreamMap.set(guildId, stream);
   stream.write(
     JSON.stringify({
       type,
@@ -86,9 +88,16 @@ export function runHandler(code: string, ctx: AnyContext) {
     },
     "console"
   );
+  vm.freeze(async (id: string) => {
+    const channel = await cntr.client.channels.fetch(id);
+    if (!channel) throw new Error("Channel doesn't exist!");
+    if (channel.type === "GUILD_TEXT") return sanitizeTextChannel(channel);
+    if (channel.type === "GUILD_VOICE") return sanitizeVoiceChannel(channel);
+    throw new Error("This channel type is not supported yet, sorry");
+  }, "fetchChannel");
 
   try {
-    vm.run(code);
+    vm.run(`(async () => {\n${code}\n})()`);
   } catch (e: any) {
     if ("message" in e) logMessage(e.message, ctx.guild.id, "fatal");
   }
@@ -102,7 +111,7 @@ export async function handleGuildEvent(
   guildId: string,
   ctx: AnyContext
 ) {
-  const handlers = await container.prisma.handler.findMany({
+  const handlers = await cntr.prisma.handler.findMany({
     where: {
       guildId,
       event,
@@ -112,7 +121,7 @@ export async function handleGuildEvent(
 }
 
 export function registerEventForHandlers(event: keyof Events) {
-  container.events.on(event, (ctx: any) => {
+  cntr.events.on(event, (ctx: any) => {
     handleGuildEvent(event, ctx.guild.id, ctx);
   });
 }

@@ -27,7 +27,7 @@ export class OperatorClient extends SapphireClient {
       defaultPrefix: PREFIX,
       loadMessageCommandListeners: false,
       disableMentionPrefix: true,
-      intents: ["GUILDS", "GUILD_MESSAGES", "DIRECT_MESSAGES"],
+      intents: ["GUILDS", "GUILD_MESSAGES", "DIRECT_MESSAGES", "GUILD_MEMBERS"],
       logger: { level: LogLevel.Debug },
       allowedMentions: {
         parse: ["users"],

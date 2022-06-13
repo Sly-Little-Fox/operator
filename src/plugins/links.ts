@@ -89,15 +89,15 @@ export default class LinksFilteringPlugin extends OperatorPlugin {
           .map((r) => ({ url: r.url, provider: r.provider })),
         message,
       });
-      if (message.member.moderatable) {
-        message.delete();
-        message.member.timeout(
-          2 * 3600 * 1000,
-          `URL(s) in the message has/have been flagged as unsafe by these vendors: ${_.uniq(
-            results.flat(2).map((r) => r.provider)
-          ).join(", ")}`
-        );
-      }
+      //if (message.member.moderatable) {
+      //  message.delete();
+      //  message.member.timeout(
+      //    2 * 3600 * 1000,
+      //    `URL(s) in the message has/have been flagged as unsafe by these vendors: ${_.uniq(
+      //      results.flat(2).map((r) => r.provider)
+      //    ).join(", ")}`
+      //  );
+      //}
     }
   }
 

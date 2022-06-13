@@ -44,7 +44,7 @@ export class TapokCommand extends Command {
           await interaction.reply(
             `> 🕒  Подожди ${Math.round(
               60 - (Date.now() - lastTapok) / 1000
-            )} секунд перед тем, как кинуть ещё один тапок`
+            )} секунд(у) перед тем, как кинуть ещё один тапок`
           );
           return;
         }
@@ -80,7 +80,7 @@ export class TapokCommand extends Command {
         if (target) {
           await this.container.tapkiManager.setHealth(
             user.id,
-            target.hp - hpDealt
+            target.hp - hpDealt < 0 ? 0 : target.hp - hpDealt
           );
         }
         if (target && target.hp <= 0) {
@@ -89,6 +89,11 @@ export class TapokCommand extends Command {
         }
         if (target)
           await this.container.tapkiManager.decrTapki(interaction.user.id, 1);
+        this.container.logger.debug(
+          target,
+          (target?.hp || 1000) <= 0,
+          target?.hp
+        );
         await interaction.reply(
           hpDealt
             ? `> 💥  **${formatUsername(

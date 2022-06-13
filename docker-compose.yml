@@ -4,10 +4,10 @@ services:
     # command: sudo -u app sh -c 'cd dist && node --experimental-json-modules index.js'
     build: .
     init: true
-    tty: true
-    user: "${UID}:${GID}"
+    tty: true #user: "${UID}:${GID}"
+    restart: always
     volumes:
-      #- $PWD:/home/app/data/ # TODO: remove this once ready for production
+      - $PWD:/home/app/data/ # TODO: remove this once ready for production
       - operator-logs:/home/app/app/logs/ # TODO: replace with a Docker volume?
     dns:
       - 1.1.1.1
@@ -40,6 +40,7 @@ services:
           memory: 1G
   postgres:
     image: postgres
+    restart: always
     # command: postgres -c listen_addresses=localhost
     environment:
       - POSTGRES_PASSWORD=operator_internal
@@ -56,14 +57,28 @@ services:
         limits:
           cpus: '1'
           memory: 1G
+    # dragonfly:
+    #   image: docker.dragonflydb.io/dragonflydb/dragonfly
+    #   command: --maxmemory 536870912 --memcache_port 11211 --proactor_threads 1
+    #   restart: always
+    #   ulimits:
+    #     memlock: -1
+    #   volumes:
+    #     - dragonfly-data:/data/
+    #   deploy:
+    #     resources:
+    #       limits:
+    #         cpus: '1'
+    #         memory: 578M
   memcached:
     image: memcached:1
-    command: memcached -m 384
+    command: memcached -m 64
+    restart: always
     deploy:
       resources:
         limits:
-          #          cpus: '1'
-          memory: 512M
+          cpus: '1'
+          memory: 128M
     # healthcheck:
     #   test: [ "CMD-SHELL", "nc", "-zw3", "localhost", "11211" ]
     #   interval: 5s
@@ -72,11 +87,12 @@ services:
   ocr:
     build: ./services/ocr/
     init: true
+    restart: always
     deploy:
       resources:
         limits:
           cpus: '1'
-          memory: 384M
+          memory: 512M
     healthcheck:
       test: curl -o /dev/null 127.0.0.1:3001
       interval: 3s
@@ -110,3 +126,5 @@ volumes:
     external: false
   operator-logs:
     external: false
+  # dragonfly-data:
+  #   external: false

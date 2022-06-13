@@ -32,7 +32,6 @@ export class HelpCommand extends Command {
 
   public async chatInputRun(interaction: CommandInteraction): Promise<void> {
     const subject = interaction.options.getString("subject");
-    this.container.logger.debug(categoryFooters, this.category);
     if (subject) {
       if (subject.split("+")[0] === "command") {
         const cmd = this.container.stores

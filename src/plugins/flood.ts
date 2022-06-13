@@ -28,14 +28,45 @@ export default class FloodPlugin {
   public static readonly DEFAULT_CONFIG = {
     resetAfter: 300,
     maxScore: 1100,
+    messageLengthDivider: 150,
+    lineCount: 0.67,
+    embeds: 0,
+    linkEmbeds: 5,
+    attachments: 15,
+    images: 30,
+    customEmoji: 4,
+    animatedCustomEmoji: 7,
+    zalgo: 30,
+    memberMentions: 70,
+    roleMentions: 140,
+    everyoneMentions: 240,
+    textThatCanCrashApple: 100,
   };
 
   public static readonly CONFIG_SCHEMA: MappedObjectValidator<any> = {
     resetAfter: s.number,
     maxScore: s.number,
+    messageLengthDivider: s.number,
+    lineCount: s.number,
+    embeds: s.number,
+    linkEmbeds: s.number,
+    attachments: s.number,
+    images: s.number,
+    customEmoji: s.number,
+    animatedCustomEmoji: s.number,
+    zalgo: s.number,
+    memberMentions: s.number,
+    roleMentions: s.number,
+    everyoneMentions: s.number,
+    textThatCanCrashApple: s.number,
   };
 
-  private calculateScore(message: GuildMessage, canSendEmbeds: boolean) {
+  private calculateScore(
+    message: GuildMessage,
+    canSendEmbeds: boolean,
+    config: Record<string, number>
+  ) {
+    const n = (opt: string) => Number(config[`${this.name}.${opt}`]);
     return (
       (message.content.split("\n").length >= 5
         ? Math.round(
@@ -50,10 +81,10 @@ export default class FloodPlugin {
                   : message.content
               )
               .join("\n")
-              .split("\n").length / 1.5
+              .split("\n").length * n("lineCount")
           )
         : 0) + // Lines in message
-      Math.round(message.content.length / 150) + // Characters in message
+      Math.round(message.content.length / n("messageLengthDivider")) + // Characters in message
       Number(
         (message.content.match(
           /(?<!<)\bhttps?:\/\/(\w+\.)+(\w+)\b(?![\w\s]*[<])/g
@@ -61,27 +92,30 @@ export default class FloodPlugin {
           0) &&
           canSendEmbeds
       ) *
-        7 + // Links with embeds
-      message.embeds.length * 15 + // Embeds
+        n("linkEmbeds") + // Links with embeds
+      message.embeds.length * n("embeds") + // Embeds
       message.attachments.filter(
         (a) => a.contentType?.startsWith("image/") ?? false
       ).size *
-        30 + // Images
+        n("images") + // Images
       message.attachments.filter((a) => !a.contentType?.startsWith("image/"))
         .size *
-        20 + // Non-images
-      (message.content.match(/<:[0-9a-zA-Z_]+:[0-9]{18}>/g)?.length || 0) * 2 + // Non-animated custom emojis
-      (message.content.match(/<a:[0-9a-zA-Z_]+:[0-9]{18}>/g)?.length || 0) * 5 + // Animated custom emojis,
-      Number(/%CC%/g.test(encodeURIComponent(message.content))) * 20 + // Zalgo
-      (message.mentions.members?.size || 0) * 10 + // Mentions of members
-      message.mentions.roles.size * 40 + // Mentions of roles
-      Number(message.mentions.everyone) * 150 + // Everyone/here mentions
+        n("attachments") + // Non-images
+      (message.content.match(/<:[0-9a-zA-Z_]+:[0-9]{18}>/g)?.length ?? 0) *
+        n("customEmoji") + // Non-animated custom emojis
+      (message.content.match(/<a:[0-9a-zA-Z_]+:[0-9]{18}>/g)?.length ?? 0) *
+        n("animatedCustomEmoji") + // Animated custom emojis,
+      Number(encodeURIComponent(message.content).includes("%CC%")) *
+        n("zalgo") + // Zalgo      + // Zalgo
+      (message.mentions.members?.size ?? 0) * n("memberMentions") + // Mentions of members
+      message.mentions.roles.size * n("roleMentions") + // Mentions of roles
+      Number(message.mentions.everyone) * n("everyoneMentions") + // Everyone/here mentions
       Number(
         crashText.some((t) =>
           message.cleanContent.includes(decodeURIComponent(t))
         )
       ) *
-        100
+        n("textThatCanCrashApple")
     );
   }
 
@@ -93,68 +127,20 @@ export default class FloodPlugin {
     const memberPermissions = await message.member.permissionsIn(
       message.channel
     );
+    const config = await container.configManager.getConfig(message.guildId);
+    const nopt = (opt: string) => Number(config[`${this.name}.${opt}`]);
     const memberCanSendEmbeds = memberPermissions.has("EMBED_LINKS");
     const oldScore = Number(await this.mGet(memberKey)) || 0;
     // const oldGuildScore = Number(await this.mGet(guildKey));
     const incrementScoreBy =
       (Date.now() - Number(await this.mGet(timestampKey)) < 2000 ? 25 : 5) +
-      (message.content.split("\n").length >= 5
-        ? Math.round(
-            message.content
-              .split("\n")
-              .map((st) =>
-                st.length > MAX_CHARACTERS_ON_LINE
-                  ? chunkString(message.content, {
-                      size: MAX_CHARACTERS_ON_LINE,
-                      unicodeAware: true,
-                    }).join("\n")
-                  : message.content
-              )
-              .join("\n")
-              .split("\n").length / 1.5
-          )
-        : 0) + // Lines in message
-      Math.round(message.content.length / 150) + // Characters in message
-      Number(
-        (message.content.match(
-          /(?<!<)\bhttps?:\/\/(\w+\.)+(\w+)\b(?![\w\s]*[<])/g
-        )?.length ||
-          0) &&
-          memberCanSendEmbeds
-      ) *
-        7 + // Links with embeds
-      message.embeds.length * 15 + // Embeds
-      message.attachments.filter(
-        (a) => a.contentType?.startsWith("image/") ?? false
-      ).size *
-        30 + // Images
-      message.attachments.filter((a) => !a.contentType?.startsWith("image/"))
-        .size *
-        20 + // Non-images
-      (message.content.match(/<:[0-9a-zA-Z_]+:[0-9]{18}>/g)?.length || 0) * 2 + // Non-animated custom emojis
-      (message.content.match(/<a:[0-9a-zA-Z_]+:[0-9]{18}>/g)?.length || 0) * 5 + // Animated custom emojis,
-      Number(/%CC%/g.test(encodeURIComponent(message.content))) * 20 + // Zalgo
-      (message.mentions.members?.size || 0) * 10 + // Mentions of members
-      message.mentions.roles.size * 40 + // Mentions of roles
-      Number(message.mentions.everyone) * 150 + // Everyone/here mentions
-      Number(
-        crashText.some((t) =>
-          message.cleanContent.includes(decodeURIComponent(t))
-        )
-      ) *
-        100; // Text that can crash iOS.
+      this.calculateScore(message, memberCanSendEmbeds, config as any); // Text that can crash iOS.
 
     const newScore = oldScore + incrementScoreBy;
-    // const newGuildScore = oldGuildScore + incrementScoreBy;
-
     if (await this.mGet(memberKey)) {
       await this.mIncr(memberKey, incrementScoreBy);
     } else {
-      await this.mSet(
-        memberKey,
-        incrementScoreBy,
-        Number(FloodPlugin.DEFAULT_CONFIG.resetAfter)
-      );
+      await this.mSet(memberKey, incrementScoreBy, nopt("resetAfter"));
     }
     await this.mIncr(guildKey, incrementScoreBy);
     await this.mSet(
@@ -167,23 +153,12 @@ export default class FloodPlugin {
       container.logger.debug(
         `Anti-flood — ${message.author.tag} оказался(ась) спамером (${newScore}/${maxAllowedScore})`
       );
-      await message.author.send("Не спамь!");
-      if (message.guild.features.includes("COMMUNITY")) {
-        if (message.member.moderatable) {
-          await message.member.timeout(30 * 60 * 1000, "Spam");
-        } else {
-          container.logger.warn(
-            `Anti-flood — Couldn't timeout ${message.author.tag}! (Not moderatable)`
-          );
-        }
-      } else {
-        container.logger.warn(
-          `Anti-flood — Couldn't timeout ${message.author.tag}! (Guild '${message.guild.name}' is not community)`
-        );
-      }
-      await message.delete();
       await this.mDecr(guildKey, Number(this.mGet(memberKey)) || 0);
       this.memcached.del(memberKey, () => {});
     }
+  }
+
+  messageUpdate(_oldMessage: GuildMessage, newMessage: GuildMessage) {
+    return this.messageCreate(newMessage);
   }
 }

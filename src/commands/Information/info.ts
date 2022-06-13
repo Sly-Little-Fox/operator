@@ -217,9 +217,9 @@ export class InfoCommand extends Command {
                 },
                 {
                   name: "Filesystem info (/)",
-                  value: `${(fsInfo.used / 1024 / 1024 / 1024).toFixed(
+                  value: `${(fsInfo?.used / 1024 / 1024 / 1024).toFixed(
                     1
-                  )} GB/${(fsInfo.size / 1024 / 1024 / 1024).toFixed(
+                  )} GB/${(fsInfo?.size / 1024 / 1024 / 1024).toFixed(
                     1
                   )} GB used (\`${fsInfo.fs}\`, ${fsInfo.type})`,
                 },
@@ -237,7 +237,7 @@ export class InfoCommand extends Command {
                 {
                   name: "Memory usage",
                   value: `${(
-                    (await si.mem()).used /
+                    (await si.mem())?.used /
                     1024 /
                     1024 /
                     1024

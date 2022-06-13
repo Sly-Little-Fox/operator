@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/return-await */
 // import "dotenv/config";
-import "@sapphire/plugin-hmr/register";
+// import "@sapphire/plugin-hmr/register";
 import "@sapphire/plugin-logger/register";
 // import { fetch, FetchResultTypes } from "@sapphire/fetch";
 import {
@@ -20,7 +20,7 @@ import _ from "lodash";
 import owoify from "owoify-js";
 import tryToCatch from "try-to-catch";
 import phin from "phin";
-//import { SocksProxyAgent } from "socks-proxy-agent"; // TODO: remove in production
+// import { SocksProxyAgent } from "socks-proxy-agent"; // TODO: remove in production
 import Fuse from "fuse.js";
 import cron from "node-cron";
 import * as intents from "./chat/intents.js";
@@ -47,6 +47,11 @@ process.on("uncaughtException", (err) => {
       throw e[1];
     });
   }
+  if (
+    err.message.includes("Cannot send messages") ||
+    err.message.includes("Missing permission")
+  )
+    return;
   throw err;
 });
 
@@ -59,6 +64,7 @@ const __dirname = path.dirname(__filename);
 process.chdir(path.join(__dirname, ".."));
 
 // Check that all env vars are present to avoid runtime errors
+
 s.object({
   GUILD_IDS: process.env.NODE_ENV === "development" ? s.string : s.any.optional,
   NODE_ENV: s.string,
@@ -76,22 +82,26 @@ client.on("ready", () => {
     );
     setTimeout(changeStatus, 15 * 60 * 1000);
   })();
+  client.stores.get("commands").forEach((v) => v.reload());
 });
 
 cron.schedule("*/8 * * * *", async () => {
   (await cntr.prisma.tapkiUser.findMany()).forEach(async (user) => {
-    if (user.tapki < 15) await cntr.tapkiManager.incrTapki(user.id, 1);
+    if (user.tapki < 10) await cntr.tapkiManager.incrTapki(user.id, 1);
     await cntr.tapkiManager.setHealth(
       user.id,
       user.hp >= 1000
         ? 1000
-        : user.hp + Math.min(1000 - user.hp, Math.round(Math.random() * 50))
+        : user.hp + Math.min(1000 - user.hp, Math.round(Math.random() * 35))
     );
   });
 });
 
-const shouldBeUwU = async (i: CommandInteraction) =>
-  (await cntr.configManager.getUserConfig(i.user.id, i.guildId))["core.uwu"];
+const shouldBeUwU = async (i: CommandInteraction) => {
+  const config = await cntr.configManager.getUserConfig(i.user.id, i.guildId);
+  // cntr.logger.debug(config);
+  return config["core.uwu"];
+};
 
 const uwu = (text: string) =>
   ((owoify as any).default as typeof owoify)(emojify(text)) +
@@ -151,8 +161,10 @@ CommandInteraction.prototype.followUp = async function reply(
   );
 };
 
+registerEventForHandlers("memberLeft");
 registerEventForHandlers("userBanned");
 registerEventForHandlers("userKicked");
+registerEventForHandlers("memberJoined");
 registerEventForHandlers("userTimedOut");
 registerEventForHandlers("warningsReset");
 registerEventForHandlers("messageCreate");
@@ -184,6 +196,24 @@ client.on("guildCreate", async (guild) => {
       ],
     });
   }
+});
+
+client.on("guildMemberAdd", (member) => {
+  cntr.events.emit("memberJoined", {
+    guild: member.guild,
+    member,
+  });
+});
+
+client.on("guildMemberRemove", (member) => {
+  if (member.partial) {
+    cntr.logger.warn("Member that left was not in cache. Not emitting event.");
+    return;
+  }
+  cntr.events.emit("memberLeft", {
+    guild: member.guild,
+    member,
+  });
 });
 
 client.on("messageDelete", async (m) => {
@@ -224,10 +254,13 @@ client.on("messageUpdate", async (oldm, m) => {
   const enabledPlugins = plugins.filter(
     (p) =>
       config[`${p.name}.enabled`] === true &&
-      !(config[`${p.name}.exclude`] as string[]).some((el) =>
-        el[0] === "@"
-          ? message.author.id !== el.slice(1)
-          : !message.member?.roles.cache.has(el.slice(1))
+      !(config[`${p.name}.exclude`] as string[]).some(
+        (el) =>
+          ({
+            "@": message.author.id !== el.slice(1),
+            "&": !message.member?.roles.cache.has(el.slice(1)),
+            "#": message.channel.id !== el.slice(1),
+          }[el[0] as "@" | "&" | "#"])
       )
   );
   const extendedMessage = message as ExtendedMessage;
@@ -377,7 +410,7 @@ client.on("messageCreate", async (message) => {
         Authorization: `Bearer ${process.env.WIT_API_TOKEN}`,
         "Content-Type": "application/json",
       },
-      parse: "json"
+      parse: "json",
     });
     const recognizedIntent =
       intents[

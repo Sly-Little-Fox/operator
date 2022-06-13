@@ -29,7 +29,7 @@ export class TapkiManager {
   }
 
   public setHealth(userId: string, health: number) {
-    s.number.lessThanOrEqual(1000).positive.parse(health);
+    s.number.lessThanOrEqual(1000).parse(health);
     return this.prisma.tapkiUser.update({
       where: { id: userId },
       data: { hp: health },

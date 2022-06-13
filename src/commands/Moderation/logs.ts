@@ -30,40 +30,48 @@ export class JpegCommand extends Command {
   }
 
   public async chatInputRun(interaction: CommandInteraction): Promise<void> {
-    const level = interaction.options.getString("filter-by-level");
-    let logs: {
-      type: "log" | "info" | "warn" | "error" | "fatal";
-      message: string;
-    }[] = (await readFile(`./logs/${interaction.guildId}.txt`, "utf-8"))
-      .split("\n")
-      .filter(Boolean)
-      .map((l) => JSON.parse(l));
-    if (level) logs = logs.filter((el) => el.type === level);
-    const newLogs: string[] = [];
-    let totalCharLength = 0;
-    for (const line of logs) {
-      if (totalCharLength > 1951) break;
-      const colorCode = `\x1b[${
-        {
-          log: 0,
-          info: 34,
-          debug: 178,
-          warn: 33,
-          error: 31,
-          fatal: 31,
-        }[line.type as string] || 0
-      }m`;
-      const newLine = `${colorCode}[${line.type.toUpperCase()}] ${
-        line.message
-      }\x1b[0m`;
-      newLogs.push(newLine);
-      totalCharLength += newLine.length + colorCode.length + 4;
+    try {
+      const level = interaction.options.getString("filter-by-level");
+      let logs: {
+        type: "log" | "info" | "warn" | "error" | "fatal";
+        message: string;
+      }[] = (await readFile(`./logs/${interaction.guildId}.txt`, "utf-8"))
+        .split("\n")
+        .filter(Boolean)
+        .map((l) => JSON.parse(l));
+      if (level) logs = logs.filter((el) => el.type === level);
+      const newLogs: string[] = [];
+      let totalCharLength = 0;
+      for (const line of logs) {
+        if (totalCharLength > 1951) break;
+        const colorCode = `\x1b[${
+          {
+            log: 0,
+            info: 34,
+            debug: 178,
+            warn: 33,
+            error: 31,
+            fatal: 31,
+          }[line.type as string] || 0
+        }m`;
+        const newLine = `${colorCode}[${line.type.toUpperCase()}] ${
+          line.message
+        }\x1b[0m`;
+        newLogs.push(newLine);
+        totalCharLength += newLine.length + colorCode.length + 4;
+      }
+      interaction.reply({
+        content:
+          "> 🧻  Here are your logs:\n```ansi\n" +
+          newLogs.join("\n").trim() +
+          "\n```",
+        ephemeral: true,
+      });
+    } catch (e: any) {
+      if (e?.code === "ENOENT") {
+        interaction.reply("> ⛔  This server doesn't have any logs!");
+      }
     }
-    interaction.reply({
-      content:
-        "Here are your logs:\n```ansi\n" + newLogs.join("\n").trim() + "\n```",
-      ephemeral: true,
-    });
   }
 
   public override registerApplicationCommands(
