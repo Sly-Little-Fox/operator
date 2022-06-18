@@ -28,6 +28,7 @@ export class E621Command extends Command {
           description:
             "You need to verify that you are at least 18 years old by providing your passport!",
           color: WARNING,
+          footer: { text: "get trolled" }
         },
       ],
     },
