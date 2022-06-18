@@ -8,7 +8,7 @@ services:
     restart: always
     volumes:
       - $PWD:/home/app/data/ # TODO: remove this once ready for production
-      - operator-logs:/home/app/app/logs/ # TODO: replace with a Docker volume?
+      - operator-logs:/home/app/data/logs/ # TODO: replace with a Docker volume?
     dns:
       - 1.1.1.1
       - 1.0.0.1
