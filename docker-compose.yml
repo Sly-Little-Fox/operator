@@ -17,7 +17,7 @@ services:
     env_file:
       - .env
     ports:
-      - "9229:9229"
+      - "127.0.0.1:9229:9229"
     links:
       - postgres:postgres.local
       - ocr:ocr.local
@@ -70,6 +70,8 @@ services:
     #       limits:
     #         cpus: '1'
     #         memory: 578M
+    #victoria:
+    #image: 
   memcached:
     image: memcached:1
     command: memcached -m 64

@@ -1,4 +1,5 @@
-import { PrismaClient } from "@prisma/client";
+import picomatch from "picomatch";
+import type { PrismaClient } from "@prisma/client";
 import { MappedObjectValidator, s } from "@sapphire/shapeshift";
 import _ from "lodash";
 // import mem from "mem";
@@ -8,7 +9,7 @@ import type { ExtendedMessage } from "../types.js";
 // import { getPluginOption } from "../utilities/configUtilities.js";
 import * as handlers from "../data/links/handlers.js";
 import OperatorPlugin from "../classes/OperatorPlugin.js";
-import type * as Providers from "../data/links/handlers.js";
+//import type * as Providers from "../data/links/handlers.js";
 // import { getConfig } from "../utilities/utilities.js";
 
 export default class LinksFilteringPlugin extends OperatorPlugin {
@@ -23,6 +24,7 @@ export default class LinksFilteringPlugin extends OperatorPlugin {
     quad9: undefined,
     yandex: undefined,
     spam404: undefined,
+    custom: [],
   };
 
   public static readonly CONFIG_SCHEMA: MappedObjectValidator<any> = {
@@ -32,6 +34,7 @@ export default class LinksFilteringPlugin extends OperatorPlugin {
     quad9: s.boolean.optional,
     yandex: s.boolean.optional,
     spam404: s.boolean.optional,
+    custom: s.string.array,
   };
 
   private urlRegex =
@@ -50,7 +53,9 @@ export default class LinksFilteringPlugin extends OperatorPlugin {
   // });
 
   async messageCreate(message: ExtendedMessage): Promise<void> {
-    const urls = (message.content + message.ocrResult).match(this.urlRegex);
+    const urls = (message.content + "\n" + message.ocrResult).match(
+      this.urlRegex
+    );
     if (!urls) return; // No URLs detected, nothing to do
 
     const config = await container.configManager.getConfig(message.guildId);
@@ -72,7 +77,7 @@ export default class LinksFilteringPlugin extends OperatorPlugin {
           Object.values(handlers)
             .filter((h) => enabledProviders.includes(h.name))
             .map(async (v) => ({
-              provider: v.name as keyof typeof Providers,
+              provider: v.name as keyof typeof handlers,
               result: await v(new URL(url)),
               url,
             }))
@@ -80,7 +85,13 @@ export default class LinksFilteringPlugin extends OperatorPlugin {
       )
     );
     // const results = [{ result: true, provider: "cloudflare" }];
-    if (results.flat(2).some((r) => !r.result)) {
+    if (
+      results.flat(2).some((r) => !r.result) ||
+      picomatch.isMatch(
+        message.content + "\n" + message.ocrResult,
+        gopt("custom") as string[]
+      )
+    ) {
       container.events.emit("linkProtectionTriggered", {
         guild: message.guild,
         matches: results

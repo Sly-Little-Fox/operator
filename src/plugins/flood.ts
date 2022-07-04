@@ -120,7 +120,6 @@ export default class FloodPlugin {
   }
 
   async messageCreate(message: GuildMessage): Promise<void> {
-    const maxAllowedScore = 1000;
     const memberKey = `member.${message.guild.id}.${message.author.id}`;
     const timestampKey = `timestamp.${message.guild.id}.${message.author.id}`;
     const guildKey = `guild.${message.guild.id}`;
@@ -132,6 +131,7 @@ export default class FloodPlugin {
     const memberCanSendEmbeds = memberPermissions.has("EMBED_LINKS");
     const oldScore = Number(await this.mGet(memberKey)) || 0;
     // const oldGuildScore = Number(await this.mGet(guildKey));
+    const maxAllowedScore = nopt("maxScore");
     const incrementScoreBy =
       (Date.now() - Number(await this.mGet(timestampKey)) < 2000 ? 25 : 5) +
       this.calculateScore(message, memberCanSendEmbeds, config as any); // Text that can crash iOS.

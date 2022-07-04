@@ -52,10 +52,17 @@ process.on("uncaughtException", (err) => {
     err.message.includes("Missing permission")
   )
     return;
+  if (err.stack?.includes("vm.js")) return;
+  throw err;
+});
+
+process.on("uncaughtRejection", (err) => {
+  if (err.stack?.includes("vm.js")) return;
   throw err;
 });
 
 // Patch __filename
+
 // eslint-disable-next-line
 const __filename = new URL("", import.meta.url).pathname;
 // eslint-disable-next-line

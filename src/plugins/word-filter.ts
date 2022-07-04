@@ -75,8 +75,13 @@ export default class LinksFilteringPlugin extends OperatorPlugin {
         threshold: 0.25,
       }
     );
-    if (fuse.search(filteredWords.join("|").toLowerCase()).length)
-      await message.delete();
+    if (fuse.search(filteredWords.join("|").toLowerCase()).length) {
+      container.events.emit("wordFilterTriggered", {
+        message,
+        guild: message.guild,
+        matchesWithConfidence: [],
+      });
+    }
   }
 
   messageUpdate(
