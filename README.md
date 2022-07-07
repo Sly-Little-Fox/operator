@@ -12,7 +12,7 @@
 5. `[DOCKER_BUILDKIT=1] docker-compose build`
 6. `docker-compose up --compatibility [-d]`
 
-### From `master` branch
+### From `main` branch
 > :warning: This branch is barely tested. Unless you really want it, use `production`.
 1. `git clone https://github.com/Sly-Little-Fox/operator`
 2.  Copy .env.example to .env and fill values.
