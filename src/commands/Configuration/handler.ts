@@ -39,6 +39,7 @@ export class HandlerCommand extends Command {
       aliases: ["handlers", "обработчики"],
       preconditions: ["GuildOnly"],
       description: "This command is used to manipulate handlers.",
+      detailedDescription: "/handler is used to create, delete, and list handlers",
       requiredUserPermissions: ["ADMINISTRATOR"],
     });
   }

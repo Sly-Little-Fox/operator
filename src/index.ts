@@ -84,9 +84,11 @@ const plugins: OperatorPlugin[] = [];
 client.on("ready", () => {
   cntr.logger.info("Successfully logged in and ready to operate!");
   (async function changeStatus() {
-    await client.user?.setActivity(
-      statuses[Math.floor(Math.random() * statuses.length)]
-    );
+    const status = statuses[Math.floor(Math.random() * statuses.length)];
+    await client.user?.setActivity({
+      ...status,
+      name: status.name + " | " + client.guilds.cache.size + " servers",
+    });
     setTimeout(changeStatus, 15 * 60 * 1000);
   })();
   client.stores.get("commands").forEach((v) => v.reload());

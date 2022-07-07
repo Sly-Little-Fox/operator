@@ -253,8 +253,16 @@ export class ConfigCommand extends Command {
             // eslint-disable-next-line no-nested-ternary
             [key]: settingAcceptsArrays
               ? append
-                ? ((config[key] as any[]) || []).concat(value.split(/, */).map(v => v.trim()).filter(v => v !== "[UNSET]"))
-                : value.split(/, */).map(v => v.trim()).filter(v => v !== "[UNSET]")
+                ? ((config[key] as any[]) || []).concat(
+                    value
+                      .split(/, */)
+                      .map((v) => v.trim())
+                      .filter((v) => v !== "[UNSET]")
+                  )
+                : value
+                    .split(/, */)
+                    .map((v) => v.trim())
+                    .filter((v) => v !== "[UNSET]")
               : fromString(value),
           };
           this.schema.parse({
