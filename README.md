@@ -1,9 +1,9 @@
 # Operator
-> Hosted version: https://top.gg/bot/972148654410448896
-
 > Operator is my new bot. It has auto-moderation, sandbox for executing JavaScript, and a couple of other features.
 
 > This README only covers self-hosting and some things in the code. Check [./docs/](docs) and command descriptions for bot documentation.
+
+> Hosted version: https://top.gg/bot/972148654410448896
 
 ## Installation
 ### From `production` branch
@@ -25,8 +25,9 @@
 
 ## Updating
 Just run `git pull` followed by `docker-compose build`, it should update everything for you.<br>
-If you get merge errors, this is probably the easiest way to fix them:
+If you get merge conflicts (you shouldn't if you haven't modified the code), this is probably the easiest way to fix them:
 1. `git fetch --all`
-2. `git reset --hard origin/\<branch-you-used-when-installing>
+2. `git reset --hard origin/\<branch-you-used-when-installing>`
+or just clone it again :troll:
 
-**Please note this is *not* the right way. This is unsupported. I'm not responsible for thermonuclear war happening because of this, your computer exploding right in front of you, and anything else caused by using this way.**
+**Please note that this restores all tracked files to their state in the repository, discarding local changes.**
