@@ -1,4 +1,6 @@
 # Operator
+> Hosted version: https://top.gg/bot/972148654410448896
+
 > Operator is my new bot. It has auto-moderation, sandbox for executing JavaScript, and a couple of other features.
 
 > This README only covers self-hosting and some things in the code. Check [./docs/](docs) and command descriptions for bot documentation.
