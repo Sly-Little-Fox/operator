@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/return-await */
 // import "dotenv/config";
-// import "@sapphire/plugin-hmr/register";
+import "@sapphire/plugin-hmr/register";
 import "@sapphire/plugin-logger/register";
 // import { fetch, FetchResultTypes } from "@sapphire/fetch";
 import {
@@ -39,6 +39,7 @@ import {
 } from "./types.js";
 import { emojify } from "./utilities/converters.js";
 import { registerEventForHandlers } from "./utilities/handlingEvents.js";
+import ExternalError from "./classes/ExternalError.js";
 
 process.on("uncaughtException", (err) => {
   if (err.message.endsWith("Received one or more errors")) {
@@ -421,6 +422,9 @@ client.on("messageCreate", async (message) => {
       },
       parse: "json",
     });
+    if (response.statusCode !== 200) {
+      throw new ExternalError("Wit returned " + response.statusCode);
+    }
     const recognizedIntent =
       intents[
         response.body.intents.sort((a, b) => a.confidence - b.confidence)[0]

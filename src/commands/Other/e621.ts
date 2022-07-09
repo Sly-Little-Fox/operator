@@ -35,9 +35,12 @@ export class E621Command extends Command {
     `You can use this command <t:${Math.round(
       Date.now() / 1000 + 567_648_000
     )}:R>`,
-    "E621 API returned an error: 666 Hvatit drochit'",
     "<https://e926.net> anyone?",
-    "Can you do that yourself please",
+    "Better go play Changed lmao",
+    "дрочка вредна для здоровья!!!!1",
+    "E621 API returned an error: 666 Hvatit drochit'",
+    "Can't you just type the address in your browser?",
+    "**e621**\nResults for your query:\n1. пошёл нахуй",
   ];
 
   public async chatInputRun(i: CommandInteraction): Promise<void> {

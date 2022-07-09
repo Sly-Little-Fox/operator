@@ -27,6 +27,21 @@ export type GuildInteraction = Discord.CommandInteraction & {
   member: Discord.GuildMember;
 };
 
+export interface E926Post {
+  id: number;
+  rating: string;
+  created_at: string;
+  updated_at: string;
+  uploader_id: number;
+  description: string;
+  preview: { url: string };
+  flags: { deleted: boolean };
+  tags: Record<string, string[]>;
+  file: { ext: string; url: string };
+  sample: { has: boolean; url: string };
+  score: { up: number; down: number; total: number };
+}
+
 export interface WitIntent {
   id: `${number}`;
   name: string;

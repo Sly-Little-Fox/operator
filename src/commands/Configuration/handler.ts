@@ -39,7 +39,11 @@ export class HandlerCommand extends Command {
       aliases: ["handlers", "обработчики"],
       preconditions: ["GuildOnly"],
       description: "This command is used to manipulate handlers.",
-      detailedDescription: "/handler is used to create, delete, and list handlers.",
+      detailedDescription:
+        "/handler is used to create, delete, and list handlers.\n" +
+        "`ctx` is the main context of handler environment.\n" +
+        "Read more about handlers here: https://github.com/Sly-" +
+        "Little-Fox/operator/blob/main/docs/Handlers/reference.md",
       requiredUserPermissions: ["ADMINISTRATOR"],
     });
   }
@@ -129,7 +133,7 @@ export class HandlerCommand extends Command {
                 )
               )
           );
-          if (process.env.SHOW_NOTICES_FOR_OLD_CLIENTS === "true")
+          if (process.env.SHOW_NOTICES_FOR_OLD_CLIENTS === "1")
             await interaction.followUp({
               content:
                 "Opened a modal. Didn't show up? Update your Discord client.",

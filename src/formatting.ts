@@ -15,7 +15,7 @@ export function externalError(message: string, title = ""): MessageEmbed {
     .setColor(ERROR)
     .setTitle(title)
     // eslint-disable-next-line no-irregular-whitespace
-    .setDescription(`:warning: ${message}`);
+    .setDescription(`:no_entry: ${message}`);
   return embed;
 }
 
