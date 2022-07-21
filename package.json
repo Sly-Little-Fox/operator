@@ -44,7 +44,7 @@
     "rotating-file-stream": "^3.0.4",
     "sharp": "^0.30.6",
     "systeminformation": "^5.11.15",
-    "terser": "^5.13.1",
+    "terser": "^5.14.2",
     "try-to-catch": "^3.0.1",
     "utf-8-validate": "^5.0.9",
     "vm2": "patriksimek/vm2"
